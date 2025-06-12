@@ -435,7 +435,15 @@ async def embedding(docs, mdl, parser_config=None, callback=None):
         callback(prog=0.7 + 0.2 * (i + 1) / len(cnts), msg="")
     cnts = cnts_
 
-    title_w = float(parser_config.get("filename_embd_weight", 0.1))
+    # 安全地处理filename_embd_weight
+    try:
+        embd_weight = parser_config.get("filename_embd_weight")
+        title_w = 0.1  # 默认值
+        if embd_weight is not None:
+            title_w = float(embd_weight)
+    except (TypeError, ValueError):
+        title_w = 0.1  # 出错时使用默认值
+
     vects = (title_w * tts + (1 - title_w) *
              cnts) if len(tts) == len(cnts) else cnts
 

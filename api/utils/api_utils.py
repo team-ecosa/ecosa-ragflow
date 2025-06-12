@@ -286,14 +286,14 @@ def token_required(func):
     def decorated_function(*args, **kwargs):
         authorization_str = flask_request.headers.get("Authorization")
         if not authorization_str:
-            return get_json_result(data=False, message="`Authorization` can't be empty")
+            return get_json_result(message="`Authorization` can't be empty")
         authorization_list = authorization_str.split()
         if len(authorization_list) < 2:
-            return get_json_result(data=False, message="Please check your authorization format.")
+            return get_json_result(message="Please check your authorization format.")
         token = authorization_list[1]
         objs = APIToken.query(token=token)
         if not objs:
-            return get_json_result(data=False, message="Authentication error: API key is invalid!", code=settings.RetCode.AUTHENTICATION_ERROR)
+            return get_json_result(message="Authentication error: API key is invalid!", code=settings.RetCode.AUTHENTICATION_ERROR)
         kwargs["tenant_id"] = objs[0].tenant_id
         return func(*args, **kwargs)
 

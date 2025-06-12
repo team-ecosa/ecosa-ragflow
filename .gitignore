@@ -193,3 +193,5 @@ dist
 # SvelteKit build / generate output
 .svelte-kit
 
+run_ragflow_server.py
+run_task_executor.py

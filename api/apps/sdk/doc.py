@@ -1151,6 +1151,7 @@ def rm_chunk(tenant_id, dataset_id, document_id):
         schema:
           type: object
     """
+    duplicate_messages = []
     if not KnowledgebaseService.accessible(kb_id=dataset_id, user_id=tenant_id):
         return get_error_data_result(message=f"You don't own the dataset {dataset_id}.")
     docs = DocumentService.get_by_ids([document_id])
