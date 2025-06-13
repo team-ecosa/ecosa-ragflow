@@ -27,7 +27,15 @@ import { ReactComponent as TemplateIcon } from '@/assets/svg/template.svg';
 import { ReactComponent as TuShareIcon } from '@/assets/svg/tushare.svg';
 import { ReactComponent as WenCaiIcon } from '@/assets/svg/wencai.svg';
 import { ReactComponent as YahooFinanceIcon } from '@/assets/svg/yahoo-finance.svg';
-import { CodeTemplateStrMap, ProgrammingLanguage } from '@/constants/agent';
+import {
+  initialKeywordsSimilarityWeightValue,
+  initialSimilarityThresholdValue,
+} from '@/components/similarity-slider';
+import {
+  AgentGlobals,
+  CodeTemplateStrMap,
+  ProgrammingLanguage,
+} from '@/constants/agent';
 
 export enum AgentDialogueMode {
   Conversational = 'conversational',
@@ -46,6 +54,11 @@ import { setInitialChatVariableEnabledFieldValue } from '@/utils/chat';
 export enum Channel {
   Text = 'text',
   News = 'news',
+}
+
+export enum PromptRole {
+  User = 'user',
+  Assistant = 'assistant',
 }
 
 import {
@@ -115,6 +128,8 @@ export enum Operator {
   WaitingDialogue = 'WaitingDialogue',
   Agent = 'Agent',
 }
+
+export const SwitchLogicOperatorOptions = ['and', 'or'];
 
 export const CommonOperatorList = Object.values(Operator).filter(
   (x) => x !== Operator.Note,
@@ -432,15 +447,42 @@ export const componentMenuList = [
   },
 ];
 
+export const SwitchOperatorOptions = [
+  { value: '=', label: 'equal', icon: 'equal' },
+  { value: '≠', label: 'notEqual', icon: 'not-equals' },
+  { value: '>', label: 'gt', icon: 'Less' },
+  { value: '≥', label: 'ge', icon: 'Greater-or-equal' },
+  { value: '<', label: 'lt', icon: 'Less' },
+  { value: '≤', label: 'le', icon: 'less-or-equal' },
+  { value: 'contains', label: 'contains', icon: 'Contains' },
+  { value: 'not contains', label: 'notContains', icon: 'not-contains' },
+  { value: 'start with', label: 'startWith', icon: 'list-start' },
+  { value: 'end with', label: 'endWith', icon: 'list-end' },
+  { value: 'empty', label: 'empty', icon: 'circle' },
+  { value: 'not empty', label: 'notEmpty', icon: 'circle-slash-2' },
+];
+
+export const SwitchElseTo = 'end_cpn_ids';
+
 const initialQueryBaseValues = {
   query: [],
 };
 
 export const initialRetrievalValues = {
-  similarity_threshold: 0.2,
-  keywords_similarity_weight: 0.3,
+  query: '',
   top_n: 8,
-  ...initialQueryBaseValues,
+  top_k: 1024,
+  kb_ids: [],
+  rerank_id: '',
+  empty_response: '',
+  ...initialSimilarityThresholdValue,
+  ...initialKeywordsSimilarityWeightValue,
+  outputs: {
+    formalized_content: {
+      type: 'string',
+      value: '',
+    },
+  },
 };
 
 export const initialBeginValues = {
@@ -593,7 +635,20 @@ export const initialExeSqlValues = {
   ...initialQueryBaseValues,
 };
 
-export const initialSwitchValues = { conditions: [] };
+export const initialSwitchValues = {
+  conditions: [
+    {
+      logical_operator: SwitchLogicOperatorOptions[0],
+      items: [
+        {
+          operator: SwitchOperatorOptions[0].value,
+        },
+      ],
+      to: [],
+    },
+  ],
+  [SwitchElseTo]: [],
+};
 
 export const initialWenCaiValues = {
   top_n: 20,
@@ -693,7 +748,7 @@ export const initialWaitingDialogueValues = {};
 export const initialAgentValues = {
   ...initialLlmBaseValues,
   sys_prompt: ``,
-  prompts: [],
+  prompts: [{ role: PromptRole.User, content: `{${AgentGlobals.SysQuery}}` }],
   message_history_window_size: 12,
   tools: [],
   outputs: {
@@ -2976,25 +3031,6 @@ export const ExeSQLOptions = ['mysql', 'postgresql', 'mariadb', 'mssql'].map(
     value: x,
   }),
 );
-
-export const SwitchElseTo = 'end_cpn_id';
-
-export const SwitchOperatorOptions = [
-  { value: '=', label: 'equal' },
-  { value: '≠', label: 'notEqual' },
-  { value: '>', label: 'gt' },
-  { value: '≥', label: 'ge' },
-  { value: '<', label: 'lt' },
-  { value: '≤', label: 'le' },
-  { value: 'contains', label: 'contains' },
-  { value: 'not contains', label: 'notContains' },
-  { value: 'start with', label: 'startWith' },
-  { value: 'end with', label: 'endWith' },
-  { value: 'empty', label: 'empty' },
-  { value: 'not empty', label: 'notEmpty' },
-];
-
-export const SwitchLogicOperatorOptions = ['and', 'or'];
 
 export const WenCaiQueryTypeOptions = [
   'stock',
